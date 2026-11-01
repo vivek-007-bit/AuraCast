@@ -1,16 +1,12 @@
 # AuraCast Weather & Machine Learning Platform
 
-> Modern, full-stack weather intelligence and hyper-local time-series machine learning platform with separated React frontend and Django REST Framework backend.
-
----
-
 ## 1. Project Overview
 
 **AuraCast** is an intelligent weather forecasting platform that couples real-time meteorological observations with an on-demand, location-specific machine learning prediction engine. 
 
 While classical global Numerical Weather Prediction (NWP) models update only every 6 to 12 hours on large geographical grids, AuraCast dynamically fits an ensemble of **Scikit-Learn Random Forest estimators** directly on the past **30 days of chronological hourly observations** specific to the exact coordinates requested. This enables accurate short-range (6-hour) temperature and humidity trajectories and 24-hour precipitation risk scoring.
 
-The project has been migrated from a monolithic Python server-side rendered application into a modern, decoupled full-stack architecture:
+
 - **Frontend (`/client`)**: React 18, Vite, Tailwind CSS, Lucide Icons, and Chart.js configured for **Netlify**.
 - **Backend (`/server`)**: Django 5 and Django REST Framework configured for **Vercel** serverless execution with in-memory TTL caching.
 
@@ -281,43 +277,3 @@ npm run dev
 Frontend runs at `http://localhost:5173/`.
 
 ---
-
-## 8. Deployment Configuration
-
-### 8.1 Netlify Frontend Deployment:
-1. Connect your repository to **Netlify**.
-2. Set **Base directory**: `client`
-3. Set **Build command**: `npm run build`
-4. Set **Publish directory**: `client/dist` (or `dist` if base is `client`)
-5. In **Environment variables**, set:
-   - `VITE_API_BASE_URL`: `https://your-backend.vercel.app/api/v1`
-6. `client/netlify.toml` handles SPA redirects (`/*` to `/index.html 200`) and immutable asset caching.
-
-### 8.2 Vercel Backend Deployment:
-1. Connect your repository to **Vercel**.
-2. Set **Root directory**: `server`
-3. Vercel automatically detects `server/vercel.json` and builds `auracast_project/wsgi.py` using `@vercel/python`.
-4. In **Project Settings -> Environment Variables**, configure:
-   - `DJANGO_SECRET_KEY`: `<generate-a-secure-random-key>`
-   - `DJANGO_DEBUG`: `False`
-   - `DJANGO_ALLOWED_HOSTS`: `.vercel.app`
-   - `CORS_ALLOWED_ORIGINS`: `https://your-frontend.netlify.app`
-   - `OPENWEATHER_API_KEY`: `<your-optional-key>`
-
----
-
-## 9. Performance Optimizations
-
-1. **Progressive Decoupled Loading**: Current weather observations load in <200ms. Heavy ML training and 720-point historical retrievals execute asynchronously without blocking page rendering.
-2. **In-Memory TTL Caching**: The Django service maintains a 10-minute sliding window cache keyed by coordinate pairs. Subsequent queries for the same city do not re-train models or exceed third-party API rate limits.
-3. **Vite Code Splitting**: Frontend bundles are partitioned into `vendor`, `charts` (`chart.js`), and `icons` chunks, ensuring the initial application shell remains lightweight (~57 kB).
-4. **Resilient Provider Fallback**: If OpenWeatherMap credentials are not configured or rate-limited, AuraCast transparently falls back to Open-Meteo with zero interruption to the user.
-
----
-
-## 10. Verification & Test Results
-
-- **Backend Pytest Suite**: 13/13 tests passed (health endpoints, geocoding validation, reverse lookup, current weather serializer, ML prediction pipeline, feature engineering, and target transformations).
-- **Live Integration Check**: Verified live coordinate resolution for Tokyo, live Open-Meteo observation retrieval, 730 historical data point retrieval, and on-demand Random Forest training.
-- **Frontend Production Build**: Vite production build succeeded in 5.41s with valid CSS and JS bundles in `client/dist/`.
-- **Original Source Integrity**: The original source project at `C:\Users\Acer\Documents\Vivek\AuraCast` remains 100% untouched and clean.
